@@ -28,13 +28,12 @@ resource "aws_instance" "docker_host" {
   instance_type = "t1.micro"
   ami = "${lookup(var.aws_amis, var.aws_region)}"
   count = 2
+  security_groups = "coreos-testing"
+  #user_data = "./conf/cloud-config.yaml"
 }
 
 
 
-#output "address" {
-#  value = "Instances: ${aws_instance.docker_host.*.id}"
-#  value = "Private IPs: ${aws_instance.docker_host.*.private_ip}"
-#  value = "Public IPs: ${aws_instance.docker_host.*.public_ip}"
-#  value = "Subnet IDs: ${aws_instance.docker_host.*.subnet_id}"
-#}
+output "address" {
+  value = "Instances: ${aws_instance.docker_host.*.id}"
+}
