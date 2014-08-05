@@ -35,8 +35,6 @@ resource "aws_instance" "docker_host" {
   user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: https://discovery.etcd.io/${var.token}\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
 }
 
-
-
-output "address" {
-  value = "Instances: ${aws_instance.docker_host.*.id}"
+output "addresses" {
+  value = "Public DNS Addresses: ${aws_instance.docker_host.*.public_dns}"
 }
