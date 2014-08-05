@@ -32,5 +32,9 @@ resource "aws_instance" "docker_host" {
 
 
 
-output "address" {
-}
+#output "address" {
+#  value = "Instances: ${aws_instance.docker_host.*.id}"
+#  value = "Private IPs: ${aws_instance.docker_host.*.private_ip}"
+#  value = "Public IPs: ${aws_instance.docker_host.*.public_ip}"
+#  value = "Subnet IDs: ${aws_instance.docker_host.*.subnet_id}"
+#}
