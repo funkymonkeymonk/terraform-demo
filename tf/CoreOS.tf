@@ -1,3 +1,5 @@
+variable "token" {}
+
 variable "access_key" {}
 variable "secret_key" {}
 variable "aws_region" {
@@ -28,8 +30,9 @@ resource "aws_instance" "docker_host" {
   instance_type = "t1.micro"
   ami = "${lookup(var.aws_amis, var.aws_region)}"
   count = 2
+  key_name = "${var.aws_key_name}"
   security_groups = "coreos-testing"
-  #user_data = "./conf/cloud-config.yaml"
+  user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: https://discovery.etcd.io/${var.token}\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
 }
 
 
