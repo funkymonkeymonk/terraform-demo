@@ -29,7 +29,7 @@ provider "aws" {
 resource "aws_instance" "docker_host" {
   instance_type = "t1.micro"
   ami = "${lookup(var.aws_amis, var.aws_region)}"
-  count = 2
+  count = 3
   key_name = "${var.aws_key_name}"
   security_groups = "coreos-testing"
   user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: https://discovery.etcd.io/${var.token}\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
