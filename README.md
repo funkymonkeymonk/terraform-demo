@@ -31,7 +31,7 @@ To run:
 
 
 ##ToDo List
-- [ ] Work out issues with security group
+- [X] Work out issues with security group
 - [ ] Compile terraform from source in the docker container so that it is always has the latest patches
 - [ ] Move the user_data to a file
 - [ ] Set up count so it's an interpolated variable and remove the need for count_override.tf file
