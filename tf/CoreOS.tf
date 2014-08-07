@@ -26,13 +26,39 @@ provider "aws" {
     region = "${var.aws_region}"
 }
 
+resource "aws_security_group" "allow_all" {
+    name = "coreos-test"
+    description = "Allow All inbound traffic on CoreOS Ports"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    
+    ingress {
+        from_port = 4001
+        to_port = 4001
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port = 7001
+        to_port = 7001
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
 resource "aws_instance" "docker_host" {
   instance_type = "t1.micro"
   ami = "${lookup(var.aws_amis, var.aws_region)}"
   count = 3
   key_name = "${var.aws_key_name}"
-  security_groups = "coreos-testing"
-  user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: https://discovery.etcd.io/${var.token}\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
+  security_groups = "coreos-test"
+  user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: ${var.token}\n    addr: $private_ipv4:4001\n    peer-addr: $private_ipv4:7001\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
 }
 
 output "addresses" {

@@ -8,7 +8,7 @@ MAINTAINER Will Weaver <monkey@buildingbananas.com>
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
-RUN apt-get install -y unzip ca-certificates
+RUN apt-get install -y unzip ca-certificates curl
 
 WORKDIR /usr/local/bin
 
