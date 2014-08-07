@@ -25,7 +25,7 @@ To run:
  - Build the container
   - ```docker build -t buildingbananas/terraform-demo .```
  - run the testing containter interactively
-  - ```docker run -i -t buildingbananas/terraform-demo```
+  - ```docker run -i -t --entrypoint=/bin/bash buildingbananas/terraform-demo -s```
  - create the default 3 instance CoreOS cluster
   - ```terraform apply --var-file=terraform.tfvars -var token=$(curl https://discovery.etcd.io/new)```
 
