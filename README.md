@@ -24,7 +24,7 @@ To run:
  - Configure the files in the tf directory. Rename them so that they do not have the .example extension.
  - Build the container
   - ```docker build -t buildingbananas/terraform-demo .```
- - run the testing containter interactively
+ - run the testing container interactively
   - ```docker run -i -t --entrypoint=/bin/bash buildingbananas/terraform-demo -s```
  - create the default 3 instance CoreOS cluster
   - ```terraform apply --var-file=terraform.tfvars -var token=$(curl https://discovery.etcd.io/new)```
@@ -32,7 +32,7 @@ To run:
 
 ##ToDo List
 - [X] Work out issues with security group
-- [ ] Compile terraform from source in the docker container so that it is always has the latest patches
+- [ ] Compile terraform from source in the docker container so that it always has the latest patches
 - [ ] Move the user_data to a file
 - [ ] Set up count so it's an interpolated variable and remove the need for count_override.tf file
 - [ ] Work out a better way method to have optional fields like key name
