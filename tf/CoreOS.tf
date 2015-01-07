@@ -9,14 +9,14 @@ variable "aws_region" {
 # CoreOS Stable Channel
 variable "aws_amis" {
     default = {
-        "ap-northeast-1": "ami-1fb9e61e"
-        "sa-east-1" : "ami-8f57fe92"
-        "ap-southeast-2" : "ami-874620bd"
-        "ap-southeast-1" : "ami-d6d88084"
-        "us-east-1"  : "ami-04a2766c"
-        "us-west-2"  : "ami-3193e801"
-        "us-west-1"  : "ami-63eae826"
-        "eu-west-1"  : "ami-92ea39e5"
+        ap-northeast-1 = "ami-1fb9e61e"
+        sa-east-1 =  "ami-8f57fe92"
+        ap-southeast-2 =  "ami-874620bd"
+        ap-southeast-1 =  "ami-d6d88084"
+        us-east-1 = "ami-04a2766c"
+        us-west-2 = "ami-3193e801"
+        us-west-1 = "ami-63eae826"
+        eu-west-1 = "ami-92ea39e5"
     }
 }
 
