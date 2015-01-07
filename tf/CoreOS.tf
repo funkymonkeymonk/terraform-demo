@@ -14,7 +14,7 @@ variable "aws_amis" {
         sa-east-1 =  "ami-cb04b4d6"
         ap-southeast-2 =  "ami-d1e981eb"
         ap-southeast-1 =  "ami-83406fd1"
-        us-east-1 = "ami-705d3d18"
+        us-east-1 = "ami-18205670"
         us-west-2 = "ami-4dd4857d"
         us-west-1 = "ami-17fae852"
         eu-west-1 = "ami-783a840f"
@@ -32,6 +32,13 @@ resource "aws_security_group" "coreos-test" {
     name = "coreos-test"
     description = "Allow All inbound traffic on CoreOS Ports"
     vpc_id = "${var.vpc_id}"
+
+    ingress {
+        from_port = 0
+        to_port = 65535
+        protocol = "tcp"
+        cidr_blocks = ["${var.inbound_cidr}"]
+    }
 
     ingress {
         from_port = 22
@@ -65,10 +72,46 @@ resource "aws_instance" "docker_host" {
   tags {
         Name = "CoreOS ${count.index}"
   }
-  user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: ${var.token}\n    addr: $private_ipv4:4001\n    peer-addr: $private_ipv4:7001\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
+  
+  #We are using heredoc as interpolation is not yet supported for files. https://github.com/hashicorp/terraform/issues/215
+  user_data = <<EOF
+#cloud-config
+coreos:
+  etcd:
+    discovery: ${var.token}
+    addr: $private_ipv4:4001
+    peer-addr: $private_ipv4:7001
+  units:
+    - name: etcd.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: docker-tcp.socket
+      command: start
+      enable: yes
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+    - name: enable-docker-tcp.service
+      command: start
+      content: |
+        [Unit]
+        Description=Enable the Docker Socket for the API
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl enable docker-tcp.socket
+EOF  
 }
 
-output "public_ip_addresses" {
-  value = "\n    ${join("\n    ", aws_instance.docker_host.*.public_ip)}"
+output "coreos_public_ip_addresses" {
+  value = "\n    ${join("\n    ", aws_instance.docker_host.*.private_ip)}"
 }
-

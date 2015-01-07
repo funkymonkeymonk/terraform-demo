@@ -1,0 +1,14 @@
+[Unit]
+Description=Shipyard
+After=docker.service
+Requires=rethinkdb.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill shipyard
+ExecStartPre=-/usr/bin/docker rm shipyard
+ExecStartPre=/usr/bin/docker pull shipyard/shipyard
+ExecStart=/usr/bin/docker run -rm -p 8080:8080 --name shipyard --link rethinkdb:rethinkdb shipyard/shipyard
+ExecStop=/usr/bin/docker stop shipyard
+
+[X-Fleet]
+MachineOf=rethinkdb.service
