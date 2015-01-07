@@ -61,6 +61,6 @@ resource "aws_instance" "docker_host" {
   user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: ${var.token}\n    addr: $private_ipv4:4001\n    peer-addr: $private_ipv4:7001\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
 }
 
-output "addresses" {
-  value = "Public DNS Addresses: ${aws_instance.docker_host.*.public_dns}"
+output "address" {
+  value = ["Public DNS Addresses: ${aws_instance.docker_host.*.id}"]
 }
