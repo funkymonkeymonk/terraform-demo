@@ -58,12 +58,4 @@ do
     sleep 1
 done
 
-export FLEETCTL_ENDPOINT="http://$address:$port"
-echo "export FLEETCTL_ENDPOINT=\"http://$address:$port\""
-if ask "Would you like to reload shipyard?"; then
-    fleetctl destroy service/*
-    fleetctl load service/*
-    fleetctl start service/*
-fi
-
 
