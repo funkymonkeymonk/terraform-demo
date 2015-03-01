@@ -1,5 +1,6 @@
 variable "token" {}
-
+variable "subnet_id" {}
+variable "vpc_id" {}
 variable "access_key" {}
 variable "secret_key" {}
 variable "aws_region" {
@@ -9,14 +10,15 @@ variable "aws_region" {
 # CoreOS Stable Channel
 variable "aws_amis" {
     default = {
-        "ap-northeast-1": "ami-1fb9e61e"
-        "sa-east-1" : "ami-8f57fe92"
-        "ap-southeast-2" : "ami-874620bd"
-        "ap-southeast-1" : "ami-d6d88084"
-        "us-east-1"  : "ami-04a2766c"
-        "us-west-2"  : "ami-3193e801"
-        "us-west-1"  : "ami-63eae826"
-        "eu-west-1"  : "ami-92ea39e5"
+        ap-northeast-1 = "ami-decfc0df"
+        sa-east-1 =  "ami-cb04b4d6"
+        ap-southeast-2 =  "ami-d1e981eb"
+        ap-southeast-1 =  "ami-83406fd1"
+        us-east-1 = "ami-18205670"
+        us-west-2 = "ami-4dd4857d"
+        us-west-1 = "ami-17fae852"
+        eu-west-1 = "ami-783a840f"
+        eu-central-1 = "ami-487d4d55"
     }
 }
 
@@ -29,38 +31,87 @@ provider "aws" {
 resource "aws_security_group" "coreos-test" {
     name = "coreos-test"
     description = "Allow All inbound traffic on CoreOS Ports"
+    vpc_id = "${var.vpc_id}"
+
+    ingress {
+        from_port = 0
+        to_port = 65535
+        protocol = "tcp"
+        cidr_blocks = ["${var.inbound_cidr}"]
+    }
 
     ingress {
         from_port = 22
         to_port = 22
         protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        cidr_blocks = ["${var.inbound_cidr}"]
     }
     
     ingress {
         from_port = 4001
         to_port = 4001
         protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        cidr_blocks = ["${var.inbound_cidr}"]
     }
 
     ingress {
         from_port = 7001
         to_port = 7001
         protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        cidr_blocks = ["${var.inbound_cidr}"]
     }
 }
 
 resource "aws_instance" "docker_host" {
-  instance_type = "t1.micro"
+  instance_type = "t2.micro"
   ami = "${lookup(var.aws_amis, var.aws_region)}"
-  count = 3
+  count = "${var.count}"
   key_name = "${var.aws_key_name}"
-  security_groups = ["${aws_security_group.coreos-test.name}"]
-  user_data = "#cloud-config\n\ncoreos:\n  etcd:\n    discovery: ${var.token}\n    addr: $private_ipv4:4001\n    peer-addr: $private_ipv4:7001\n  units:\n    - name: etcd.service\n      command: start\n    - name: fleet.service\n      command: start"
+  security_groups = ["${aws_security_group.coreos-test.id}"]
+  subnet_id = "${var.subnet_id}"
+  tags {
+        Name = "CoreOS ${count.index}"
+  }
+  
+  #We are using heredoc as interpolation is not yet supported for files. https://github.com/hashicorp/terraform/issues/215
+  user_data = <<EOF
+#cloud-config
+coreos:
+  etcd:
+    discovery: ${var.token}
+    addr: $private_ipv4:4001
+    peer-addr: $private_ipv4:7001
+  units:
+    - name: etcd.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: docker-tcp.socket
+      command: start
+      enable: yes
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+    - name: enable-docker-tcp.service
+      command: start
+      content: |
+        [Unit]
+        Description=Enable the Docker Socket for the API
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl enable docker-tcp.socket
+EOF  
 }
 
-output "addresses" {
-  value = "Public DNS Addresses: ${aws_instance.docker_host.*.public_dns}"
+output "coreos_public_ip_addresses" {
+  value = "\n    ${join("\n    ", aws_instance.docker_host.*.private_ip)}"
 }

@@ -12,7 +12,7 @@ RUN apt-get install -y unzip ca-certificates curl
 
 WORKDIR /usr/local/bin
 
-ADD http://dl.bintray.com/mitchellh/terraform/terraform_0.1.1_linux_amd64.zip /usr/local/bin/terraform.zip
+ADD http://dl.bintray.com/mitchellh/terraform/terraform_0.3.5_linux_amd64.zip /usr/local/bin/terraform.zip
 RUN unzip terraform.zip; rm terraform.zip
 
 # User setup

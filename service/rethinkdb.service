@@ -1,0 +1,11 @@
+[Unit]
+Description=RethinkDb
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill shipyard/rethinkdb
+ExecStartPre=-/usr/bin/docker rm rethinkdb
+ExecStartPre=/usr/bin/docker pull shipyard/rethinkdb
+ExecStart=/usr/bin/docker run -rm -P  --name rethinkdb shipyard/rethinkdb
+ExecStop=/usr/bin/docker stop rethinkdb
