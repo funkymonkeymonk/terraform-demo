@@ -1,0 +1,1 @@
+curl -w "\n" https://discovery.etcd.io/new > discovery.token

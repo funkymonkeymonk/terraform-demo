@@ -7,7 +7,7 @@ ask() {
     while true; do
  
         if [ "${2:-}" = "Y" ]; then
-            prompt="Y/n"
+            prompt="y/n"
             default=Y
         elif [ "${2:-}" = "N" ]; then
             prompt="y/N"

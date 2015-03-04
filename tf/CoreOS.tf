@@ -1,8 +1,8 @@
 variable "token" {}
-variable "subnet_id" {}
-variable "vpc_id" {}
 variable "access_key" {}
 variable "secret_key" {}
+
+
 variable "aws_region" {
     default = "us-east-1"
 }
@@ -28,10 +28,27 @@ provider "aws" {
     region = "${var.aws_region}"
 }
 
+resource "aws_vpc" "coreos" {
+    cidr_block = "10.0.0.0/16"
+    tags {
+        Name = "CoreOS VPC"
+    }
+}
+
+resource "aws_subnet" "coreos" {
+    vpc_id = "${aws_vpc.coreos.id}"
+    cidr_block = "10.0.1.0/24"
+    map_public_ip_on_launch = "true"
+
+    tags {
+        Name = "CoreOS Cluster"
+    }
+}
+
 resource "aws_security_group" "coreos-test" {
     name = "coreos-test"
     description = "Allow All inbound traffic on CoreOS Ports"
-    vpc_id = "${var.vpc_id}"
+    vpc_id = "${aws_vpc.coreos.id}"
 
     ingress {
         from_port = 0
@@ -68,7 +85,7 @@ resource "aws_instance" "docker_host" {
   count = "${var.count}"
   key_name = "${var.aws_key_name}"
   security_groups = ["${aws_security_group.coreos-test.id}"]
-  subnet_id = "${var.subnet_id}"
+  subnet_id = "${aws_subnet.coreos.id}"
   tags {
         Name = "CoreOS ${count.index}"
   }
